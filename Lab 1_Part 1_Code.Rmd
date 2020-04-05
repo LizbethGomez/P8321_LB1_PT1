@@ -1,6 +1,6 @@
 ---
 title: 'EHSC P8321: Lab & Homework #1'
-author: 'Lizbeth Gomez (UNI: LG2982'
+author: 'Lizbeth Gomez (UNI: LG2982)'
 date: 'Due: April 6, 2020 by 3:59 pm'
 output:
   word_document: default
