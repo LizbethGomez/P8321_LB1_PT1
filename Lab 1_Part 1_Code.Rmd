@@ -1,0 +1,148 @@
+---
+title: 'EHSC P8321: Lab & Homework #1'
+author: 'Lizbeth Gomez (UNI: LG2982'
+date: 'Due: April 6, 2020 by 3:59 pm'
+output:
+  word_document: default
+  pdf_document: default
+---
+
+## PART I. Setting up RStudio & Reading Datasets in
+### The first task we want to do after creating up our R Markdown document is to install and load any necessary packages.
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# install.packages("tidyverse")
+library(tidyverse)
+
+setwd("~/Desktop/CUMC-MPH/Spring 2020/INTRO TO DATA SCI/Session_1")
+```
+
+
+### Create new dataframes in RStudio with the COVID-19 time series datasets.
+```{r loaddata}
+confirmed = read_csv("./data/time_series_covid19_confirmed_global.csv")
+deaths = read_csv("./data/time_series_covid19_deaths_global.csv")
+recovered = read_csv("./data/time_series_covid19_recovered_global.csv")
+```
+
+
+
+## PART II. Descriptive Statistics
+### What if we wanted to know the total number of confirmed cases, deaths, and those recovered from COVID-19 of a country? Let's generate some summary statistics for Iran.
+```{r iran_statistics}
+# Let's do some data tidying. First we want to convert the dataset from wide-to-long format using the pivot_longer function. We can use the janitor::clean_names() function to change the variable names into RStudio-friendly names. Next, we want to select only the variables of interest. Last, we can filter the dataset for cases in Iran only.
+iran_confirmed = confirmed %>%
+  pivot_longer(
+    "1/22/20":"3/7/20",
+    names_to = "date",
+    values_to = "cases") %>%
+  janitor::clean_names() %>% 
+  select(country_region, lat, long, date, cases) %>% 
+  filter (country_region == "Iran") 
+iran_totalcases = sum(iran_confirmed$cases)
+
+# We can follow the same tidying method for the deaths and recovered datasets.
+iran_deaths = deaths %>%
+  pivot_longer(
+    "1/22/20":"3/7/20",
+    names_to = "date",
+    values_to = "deaths") %>%
+  janitor::clean_names() %>% 
+  select(country_region, lat, long, date, deaths) %>% 
+  filter (country_region == "Iran")
+iran_totaldeaths = sum(iran_deaths$deaths)
+
+iran_recovered = recovered %>%
+  pivot_longer(
+    "1/22/20":"3/7/20",
+    names_to = "date",
+    values_to = "recovered") %>%
+  janitor::clean_names() %>% 
+  select(country_region, lat, long, date, recovered) %>% 
+  filter (country_region == "Iran")
+iran_totalrecovered = sum(iran_recovered$recovered)
+```
+To date, Iran has `r iran_totalcases` total confirmed cases, `r iran_totaldeaths` total deaths, and `r iran_totalrecovered` total recovered individuals.
+
+
+### Your turn: Generate the total number of confirmed cases, deaths, and those recovered from COVID-19 in Ireland. Using inline R, include a summary sentence about Ireland's statistics.
+```{r ireland_statistics}
+
+```
+
+
+
+
+## PART III. Creating Visualizations
+### Let's create a scatterplot with confirmed case counts to date of the three largest Chinese cities by population (Shanghai, Beijing, and Chongqing).
+```{r scatterplot_china}
+china_confirmed = confirmed %>%
+  pivot_longer(
+    "1/22/20":"3/7/20",
+    names_to = "date",
+    values_to = "cases") %>%
+  janitor::clean_names() %>% 
+  select(province_state, country_region, lat, long, date, cases) %>% 
+  rename ("city" = province_state) %>% 
+  filter (country_region == "China", city == c("Shanghai", "Beijing", "Chongqing")) %>% 
+  mutate(date = as.Date(date, format = "%m/%d/%y"))
+
+china_confirmed %>% 
+  ggplot(aes(x = date, y = cases, color = city)) + 
+  geom_point(alpha = 0.5) +
+  geom_smooth(se = FALSE) +
+  facet_grid(. ~ city) +
+  labs(title = "Confirmed COVID-19 Cases, 1/22/20-3/7/20",
+       x = "Date",
+       y = "Number of Confirmed Cases")
+```
+
+
+### Your turn: create a scatterplot of Italy's confirmed case counts to date.
+```{r scatterplot_italy}
+
+```
+
+
+## What if we wanted to know if the distribution of the number of deaths from COVID-19 differed across the three main cities in China? Let's create a histogram of China's deaths from COVID-19 to date:
+```{r histogram_china}
+china_deaths = deaths %>%
+  pivot_longer(
+    "1/22/20":"3/7/20",
+    names_to = "date",
+    values_to = "deaths") %>%
+  janitor::clean_names() %>% 
+  select(province_state, country_region, lat, long, date, deaths) %>% 
+  rename ("city" = province_state) %>% 
+  filter (country_region == "China", city == c("Shanghai", "Beijing", "Chongqing")) %>% 
+  mutate(date = as.Date(date, format = "%m/%d/%y"))
+
+china_deaths %>% 
+  ggplot(aes(x = deaths, fill = city)) + 
+  geom_histogram(position = "dodge", binwidth = 2) +
+  labs(title = "Distribution of Deaths from COVID-19 Between 1/22/20-3/7/20",
+       x = "Number of Deaths",
+       y = "Count")
+```
+
+
+### While a histogram is a great way of showing the distribution of data, having the bars for each group side-by-side gets sort of hard to understand. We can often use density plots in place of histograms when comparing distributions across groups:
+```{r densityplot_china}
+china_deaths %>% 
+  ggplot(aes(x = deaths, fill = city)) + 
+  geom_density(alpha = 0.4, adjust = 0.5, color = "black") +
+  labs(title = "Distribution of Deaths from COVID-19 Between 1/22/20-3/7/20",
+       x = "Number of Deaths",
+       y = "Count")
+```
+
+
+### Your turn: Create both a histogram and a density plot of Italy's deaths from COVID-19 to date.
+```{r deathdistribution_italy}
+
+```
+
+
+
+## Homework 1, Part 1: Finish generating the plots from the labs if you have not done so already. Knit this R Markdown document to a Word document and submit on Courseworks.
