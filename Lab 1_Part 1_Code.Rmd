@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # install.packages("tidyverse")
 library(tidyverse)
 
-setwd("~/Desktop/CUMC-MPH/Spring 2020/INTRO TO DATA SCI/Session_1")
+setwd("~/Desktop/CUMC-MPH/Spring 2020/INTRO TO DATA SCI/Session_1/LAB/P8321_LB1_PT1")
 ```
 
 
@@ -69,9 +69,38 @@ To date, Iran has `r iran_totalcases` total confirmed cases, `r iran_totaldeaths
 ### Your turn: Generate the total number of confirmed cases, deaths, and those recovered from COVID-19 in Ireland. Using inline R, include a summary sentence about Ireland's statistics.
 ```{r ireland_statistics}
 
+ireland_confirmed = confirmed %>%
+  pivot_longer(
+    "1/22/20":"3/7/20",
+    names_to = "date",
+    values_to = "cases") %>%
+  janitor::clean_names() %>% 
+  select(country_region, lat, long, date, cases) %>% 
+  filter (country_region == "Ireland") 
+ireland_totalcases = sum(ireland_confirmed$cases)
+
+# We can follow the same tidying method for the deaths and recovered datasets.
+ireland_deaths = deaths %>%
+  pivot_longer(
+    "1/22/20":"3/7/20",
+    names_to = "date",
+    values_to = "deaths") %>%
+  janitor::clean_names() %>% 
+  select(country_region, lat, long, date, deaths) %>% 
+  filter (country_region == "Ireland")
+ireland_totaldeaths = sum(ireland_deaths$deaths)
+
+ireland_recovered = recovered %>%
+  pivot_longer(
+    "1/22/20":"3/7/20",
+    names_to = "date",
+    values_to = "recovered") %>%
+  janitor::clean_names() %>% 
+  select(country_region, lat, long, date, recovered) %>% 
+  filter (country_region == "Ireland")
+ireland_totalrecovered = sum(ireland_recovered$recovered)
 ```
-
-
+To date, Ireland has `r ireland_totalcases` total confirmed cases, `r ireland_totaldeaths` total deaths, and `r ireland_totalrecovered` total recovered individuals.
 
 
 ## PART III. Creating Visualizations
@@ -101,7 +130,25 @@ china_confirmed %>%
 
 ### Your turn: create a scatterplot of Italy's confirmed case counts to date.
 ```{r scatterplot_italy}
+italy_confirmed = confirmed %>%
+  pivot_longer(
+    "1/22/20":"3/7/20",
+    names_to = "date",
+    values_to = "cases") %>%
+  janitor::clean_names() %>% 
+  select(province_state, country_region, lat, long, date, cases) %>% 
+  rename ("city" = province_state) %>% 
+  filter (country_region == "Italy") %>% 
+  mutate(date = as.Date(date, format = "%m/%d/%y"))
 
+italy_confirmed %>% 
+  ggplot(aes(x = date, y = cases)) + 
+  geom_point(alpha = 0.5) +
+  geom_smooth(se = FALSE) +
+  facet_grid(. ~ city) +
+  labs(title = "Confirmed COVID-19 Cases in Italy \n [1/22/20-3/7/20]",
+       x = "Date",
+       y = "Number of Confirmed Cases")
 ```
 
 
@@ -140,6 +187,31 @@ china_deaths %>%
 
 ### Your turn: Create both a histogram and a density plot of Italy's deaths from COVID-19 to date.
 ```{r deathdistribution_italy}
+
+italy_deaths = deaths %>%
+  pivot_longer(
+    "1/22/20":"3/7/20",
+    names_to = "date",
+    values_to = "deaths") %>%
+  janitor::clean_names() %>% 
+  select(province_state, country_region, lat, long, date, deaths) %>% 
+  filter (country_region == "Italy") %>% 
+  mutate(date = as.Date(date, format = "%m/%d/%y"))
+
+italy_deaths %>% 
+  ggplot(aes(x = deaths)) + 
+  geom_histogram(position = "dodge", binwidth = 2) +
+  labs(title = "Distribution of Deaths from COVID-19 in Italy \n Between 1/22/20-3/7/20",
+       x = "Number of Deaths",
+       y = "Count")
+
+#density plot
+italy_deaths %>% 
+  ggplot(aes(x = deaths)) + 
+  geom_density(alpha = 0.4, adjust = 0.5, color = "black") +
+  labs(title = "Distribution of Deaths from COVID-19 Between 1/22/20-3/7/20",
+       x = "Number of Deaths",
+       y = "Count")
 
 ```
 
