@@ -209,7 +209,7 @@ italy_deaths %>%
 italy_deaths %>% 
   ggplot(aes(x = deaths)) + 
   geom_density(alpha = 0.4, adjust = 0.5, color = "black") +
-  labs(title = "Distribution of Deaths from COVID-19 Between 1/22/20-3/7/20",
+  labs(title = "Distribution of Deaths from COVID-19 Between \n 1/22/20-3/7/20",
        x = "Number of Deaths",
        y = "Count")
 
